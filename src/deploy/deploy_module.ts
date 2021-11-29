@@ -6,9 +6,9 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
   const { deployer } = await getNamedAccounts();
   const { deploy } = deployments;
-  const args = [AddressOne];
+  const args = [AddressOne, AddressOne, []];
 
-  await deploy("ScopeGuard", {
+  await deploy("ModGuard", {
     from: deployer,
     args,
     log: true,
@@ -16,5 +16,5 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 
-deploy.tags = ["scope-guard"];
+deploy.tags = ["protect-mod-guard"];
 export default deploy;

@@ -1,7 +1,7 @@
 {
-  "name": "zodiac-scope-guard",
+  "name": "zodiac-guard-mod",
   "version": "1.0.0",
-  "description": "A transaction guard that allows the owner to limit the multisig signers to calling specific function signatures on specific contracts.",
+  "description": "A transaction guard that allows the owner to guard against transactions that would disable protected modules.",
   "author": "Auryn Macmillan <auryn.macmillan@gnosis.io>",
   "license": "LGPL-3.0+",
   "scripts": {

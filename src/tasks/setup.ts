@@ -4,13 +4,13 @@ import { task, types } from "hardhat/config";
 import { deployAndSetUpModule } from "@gnosis.pm/zodiac";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-interface ScopeGuardTaskArgs {
+interface ModGuardTaskArgs {
   owner: string;
   proxied: boolean;
 }
 
-const deployScopeGuard = async (
-  taskArgs: ScopeGuardTaskArgs,
+const deployModGuard = async (
+  taskArgs: ModGuardTaskArgs,
   hardhatRuntime: HardhatRuntimeEnvironment
 ) => {
   const [caller] = await hardhatRuntime.ethers.getSigners();
@@ -31,16 +31,16 @@ const deployScopeGuard = async (
 
     const deploymentTransaction = await caller.sendTransaction(transaction);
     const receipt = await deploymentTransaction.wait();
-    console.log("ScopeGuard deployed to:", receipt.logs[1].address);
+    console.log("ModGuard deployed to:", receipt.logs[1].address);
     return;
   }
 
-  const Guard = await hardhatRuntime.ethers.getContractFactory("ScopeGuard");
+  const Guard = await hardhatRuntime.ethers.getContractFactory("ModGuard");
   const guard = await Guard.deploy(taskArgs.owner);
-  console.log("ScopeGuard deployed to:", guard.address);
+  console.log("ModGuard deployed to:", guard.address);
 };
 
-task("setup", "Deploys a ScopeGuard")
+task("setup", "Deploys a ModGuard")
   .addParam("owner", "Address of the Owner", undefined, types.string)
   .addParam(
     "proxied",
@@ -49,10 +49,10 @@ task("setup", "Deploys a ScopeGuard")
     types.boolean,
     true
   )
-  .setAction(deployScopeGuard);
+  .setAction(deployModGuard);
 
 task("verifyEtherscan", "Verifies the contract on etherscan")
-  .addParam("guard", "Address of the ScopeGuard", undefined, types.string)
+  .addParam("guard", "Address of the ModGuard", undefined, types.string)
   .addParam("owner", "Address of the Owner", undefined, types.string)
   .setAction(async (taskArgs, hardhatRuntime) => {
     const [caller] = await hardhatRuntime.ethers.getSigners();
@@ -79,7 +79,7 @@ task("allowTarget", "Allows a target address.")
     const [caller] = await hardhatRuntime.ethers.getSigners();
     console.log("Using the account:", caller.address);
     const guard = await hardhatRuntime.ethers.getContractAt(
-      "ScopeGuard",
+      "ModGuard",
       taskArgs.guard
     );
     await guard.allowTarget(taskArgs.target);
@@ -104,7 +104,7 @@ task("disallowTarget", "Disallows a target address.")
     const [caller] = await hardhatRuntime.ethers.getSigners();
     console.log("Using the account:", caller.address);
     const guard = await hardhatRuntime.ethers.getContractAt(
-      "ScopeGuard",
+      "ModGuard",
       taskArgs.guard
     );
     await guard.disallowTarget(taskArgs.target);
@@ -129,7 +129,7 @@ task("allowDelegateCall", "Allows delegate calls to an allowed target address.")
     const [caller] = await hardhatRuntime.ethers.getSigners();
     console.log("Using the account:", caller.address);
     const guard = await hardhatRuntime.ethers.getContractAt(
-      "ScopeGuard",
+      "ModGuard",
       taskArgs.guard
     );
     await guard.allowDelegateCall(taskArgs.target);
@@ -157,7 +157,7 @@ task(
     const [caller] = await hardhatRuntime.ethers.getSigners();
     console.log("Using the account:", caller.address);
     const guard = await hardhatRuntime.ethers.getContractAt(
-      "ScopeGuard",
+      "ModGuard",
       taskArgs.guard
     );
     await guard.disallowDelegateCall(taskArgs.target);
@@ -166,8 +166,8 @@ task(
   });
 
 task(
-  "toggleScoped",
-  "Toggles whether a target address is scoped to specific functions."
+  "toggleModd",
+  "Toggles whether a target address is modd to specific functions."
 )
   .addParam(
     "guard",
@@ -177,7 +177,7 @@ task(
   )
   .addParam(
     "target",
-    "The target address to be (un)scoped.",
+    "The target address to be (un)modd.",
     undefined,
     types.string
   )
@@ -185,15 +185,15 @@ task(
     const [caller] = await hardhatRuntime.ethers.getSigners();
     console.log("Using the account:", caller.address);
     const guard = await hardhatRuntime.ethers.getContractAt(
-      "ScopeGuard",
+      "ModGuard",
       taskArgs.guard
     );
-    let tx = await guard.toggleScoped(taskArgs.target);
+    let tx = await guard.toggleModd(taskArgs.target);
     let receipt = await tx.wait();
 
     console.log(
-      "Scoped set to",
-      await guard.isScoped(taskArgs.target),
+      "Modd set to",
+      await guard.isModd(taskArgs.target),
       "for target address",
       taskArgs.target
     );
@@ -225,7 +225,7 @@ task(
     const [caller] = await hardhatRuntime.ethers.getSigners();
     console.log("Using the account:", caller.address);
     const guard = await hardhatRuntime.ethers.getContractAt(
-      "ScopeGuard",
+      "ModGuard",
       taskArgs.guard
     );
     await guard.allowFunction(taskArgs.target, taskArgs.sig);
@@ -264,7 +264,7 @@ task(
     const [caller] = await hardhatRuntime.ethers.getSigners();
     console.log("Using the account:", caller.address);
     const guard = await hardhatRuntime.ethers.getContractAt(
-      "ScopeGuard",
+      "ModGuard",
       taskArgs.guard
     );
     await guard.disallowFunction(taskArgs.target, taskArgs.sig);
@@ -279,7 +279,7 @@ task(
 
 task(
   "transferOwnership",
-  "Toggles whether a target address is scoped to specific functions."
+  "Toggles whether a target address is modd to specific functions."
 )
   .addParam(
     "guard",
@@ -297,13 +297,13 @@ task(
     const [caller] = await hardhatRuntime.ethers.getSigners();
     console.log("Using the account:", caller.address);
     const guard = await hardhatRuntime.ethers.getContractAt(
-      "ScopeGuard",
+      "ModGuard",
       taskArgs.guard
     );
     let tx = await guard.transferOwnership(taskArgs.newowner);
     let receipt = await tx.wait();
 
-    console.log("ScopeGuard now owned by: ", await guard.owner());
+    console.log("ModGuard now owned by: ", await guard.owner());
   });
 
 task(

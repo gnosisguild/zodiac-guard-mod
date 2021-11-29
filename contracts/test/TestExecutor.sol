@@ -41,6 +41,10 @@ contract TestAvatar {
         guard = _guard;
     }
 
+    function isModuleEnabled(address _module) external view returns (bool) {
+        return (module == _module);
+    }
+
     function execTransaction(
         address to,
         uint256 value,
