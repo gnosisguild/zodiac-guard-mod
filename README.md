@@ -1,7 +1,7 @@
 # ModGuard
 
-[![Build Status](https://github.com/gnosis/zodiac-guard-protect/actions/workflows/ci.yml/badge.svg)](https://github.com/gnosis/zodiac-guard-protect/actions/workflows/ci.yml)
-[![Coverage Status](https://coveralls.io/repos/github/gnosis/zodiac-guard-protect/badge.svg?branch=main)](https://coveralls.io/github/gnosis/zodiac-guard-protect)
+[![Build Status](https://github.com/gnosis/zodiac-guard-mod/actions/workflows/ci.yml/badge.svg)](https://github.com/gnosis/zodiac-guard-mod/actions/workflows/ci.yml)
+[![Coverage Status](https://coveralls.io/repos/github/gnosis/zodiac-guard-mod/badge.svg?branch=main)](https://coveralls.io/github/gnosis/zodiac-guard-mod)
 
 A transaction guard that allows the owner to guard against transactions that would disable protected mods.
 
