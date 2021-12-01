@@ -17,7 +17,10 @@ describe("ModGuard", async () => {
       AddressOne,
     ]);
     await avatar.enableModule(user1.address);
-    await avatar.setGuard(guard.address);
+    const setGuard = await avatar.populateTransaction.setGuard(guard.address);
+    await expect(
+      avatar.execTransactionFromModule(avatar.address, 0, setGuard.data, 0)
+    );
     const tx = {
       to: avatar.address,
       value: 0,
@@ -88,7 +91,7 @@ describe("ModGuard", async () => {
   });
 
   describe("checkAfterExecution()", async () => {
-    it("should revert if protected module is disabled", async () => {
+    it("reverts if protected module is disabled", async () => {
       const { guard } = await setupTests();
       await expect(
         guard.checkAfterExecution(

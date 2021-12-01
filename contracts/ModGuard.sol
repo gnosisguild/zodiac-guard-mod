@@ -4,6 +4,7 @@ pragma solidity ^0.8.6;
 import "@gnosis.pm/zodiac/contracts/interfaces/IAvatar.sol";
 import "@gnosis.pm/zodiac/contracts/guard/BaseGuard.sol";
 import "@gnosis.pm/zodiac/contracts/factory/FactoryFriendly.sol";
+import "@gnosis.pm/safe-contracts/contracts/common/StorageAccessible.sol";
 
 contract ModGuard is FactoryFriendly, BaseGuard {
     event ModGuardSetup(
@@ -17,6 +18,10 @@ contract ModGuard is FactoryFriendly, BaseGuard {
 
     address public avatar;
     address[] public protectedModules;
+
+    // keccak256("guard_manager.guard.address")
+    bytes32 internal constant GUARD_STORAGE_SLOT =
+        0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8;
 
     constructor(
         address _owner,
@@ -73,6 +78,16 @@ contract ModGuard is FactoryFriendly, BaseGuard {
     ) external view override {}
 
     function checkAfterExecution(bytes32, bool) external view override {
+        require(
+            abi.decode(
+                StorageAccessible(avatar).getStorageAt(
+                    uint256(GUARD_STORAGE_SLOT),
+                    0
+                ),
+                (address)
+            ) == address(this),
+            "Cannot disable this guard"
+        );
         for (uint256 i = 0; i < protectedModules.length; i++) {
             require(
                 IAvatar(avatar).isModuleEnabled(protectedModules[i]),

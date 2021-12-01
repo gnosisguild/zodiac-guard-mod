@@ -1,33 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 pragma solidity >=0.8.0;
 
-contract Enum {
-    enum Operation {
-        Call,
-        DelegateCall
-    }
-}
+import "@gnosis.pm/safe-contracts/contracts/common/StorageAccessible.sol";
+import "@gnosis.pm/safe-contracts/contracts/base/GuardManager.sol";
 
-interface Guard {
-    function checkTransaction(
-        address to,
-        uint256,
-        bytes memory data,
-        Enum.Operation operation,
-        uint256,
-        uint256,
-        uint256,
-        address,
-        // solhint-disallow-next-line no-unused-vars
-        address payable,
-        bytes memory,
-        address
-    ) external view;
-
-    function checkAfterExecution(bytes32, bool) external view;
-}
-
-contract TestAvatar {
+contract TestAvatar is StorageAccessible, GuardManager {
     address public module;
     address public guard;
 
@@ -35,10 +12,6 @@ contract TestAvatar {
 
     function enableModule(address _module) external {
         module = _module;
-    }
-
-    function setGuard(address _guard) external {
-        guard = _guard;
     }
 
     function isModuleEnabled(address _module) external view returns (bool) {
