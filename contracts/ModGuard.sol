@@ -16,6 +16,12 @@ contract ModGuard is FactoryFriendly, BaseGuard {
     event ProtectedModulesSet(address[] protectedModules);
     event AvatarSet(address avatar);
 
+    // Cannot disable this guard
+    error CannotDisableThisGuard(address guard);
+
+    // Cannot disable protected modules
+    error CannotDisableProtecedModules(address module);
+
     address public avatar;
     address[] public protectedModules;
 
@@ -78,21 +84,21 @@ contract ModGuard is FactoryFriendly, BaseGuard {
     ) external view override {}
 
     function checkAfterExecution(bytes32, bool) external view override {
-        require(
+        if (
             abi.decode(
                 StorageAccessible(avatar).getStorageAt(
                     uint256(GUARD_STORAGE_SLOT),
-                    0
+                    2
                 ),
                 (address)
-            ) == address(this),
-            "Cannot disable this guard"
-        );
+            ) != address(this)
+        ) {
+            revert CannotDisableThisGuard(address(this));
+        }
         for (uint256 i = 0; i < protectedModules.length; i++) {
-            require(
-                IAvatar(avatar).isModuleEnabled(protectedModules[i]),
-                "Cannot disable protected modules"
-            );
+            if (!IAvatar(avatar).isModuleEnabled(protectedModules[i])) {
+                revert CannotDisableProtecedModules(protectedModules[i]);
+            }
         }
     }
 }

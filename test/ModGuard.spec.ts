@@ -78,7 +78,7 @@ describe("ModGuard", async () => {
         data: "0xbaddad",
       });
     });
-    it("should revert on fallback with value", async () => {
+    it("reverts on fallback with value", async () => {
       const { guard } = await setupTests();
       await expect(
         user1.sendTransaction({
@@ -91,6 +91,20 @@ describe("ModGuard", async () => {
   });
 
   describe("checkAfterExecution()", async () => {
+    it("reverts if this guard is disabled", async () => {
+      const { avatar, guard } = await setupTests();
+      const setGuard = await avatar.populateTransaction.setGuard(AddressZero);
+      await expect(
+        avatar.execTransactionFromModule(avatar.address, 0, setGuard.data, 0)
+      );
+      await expect(
+        guard.checkAfterExecution(
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          true
+        )
+      ).to.be.revertedWith("CannotDisableThisGuard");
+    });
+
     it("reverts if protected module is disabled", async () => {
       const { guard } = await setupTests();
       await expect(
@@ -98,7 +112,7 @@ describe("ModGuard", async () => {
           "0x0000000000000000000000000000000000000000000000000000000000000000",
           true
         )
-      ).to.be.revertedWith("Cannot disable protected modules");
+      ).to.be.revertedWith("CannotDisableProtecedModules");
     });
 
     it("allows execution if protected module is enabled", async () => {
