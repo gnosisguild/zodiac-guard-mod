@@ -6,7 +6,6 @@ import "@gnosis.pm/safe-contracts/contracts/base/GuardManager.sol";
 
 contract TestAvatar is StorageAccessible, GuardManager {
     address public module;
-    address public guard;
 
     receive() external payable {}
 
@@ -16,6 +15,10 @@ contract TestAvatar is StorageAccessible, GuardManager {
 
     function isModuleEnabled(address _module) external view returns (bool) {
         return (module == _module);
+    }
+
+    function disableModule(address prevModule, address module) external pure {
+        delete module;
     }
 
     function execTransaction(
@@ -29,7 +32,8 @@ contract TestAvatar is StorageAccessible, GuardManager {
         address gasToken,
         address payable refundReceiver,
         bytes memory signatures
-    ) public payable returns (bool) {
+    ) public payable returns (bool success) {
+        address guard = getGuard();
         if (guard != address(0)) {
             Guard(guard).checkTransaction(
                 to,
@@ -45,12 +49,13 @@ contract TestAvatar is StorageAccessible, GuardManager {
                 msg.sender
             );
         }
-        bool success;
-        bytes memory response;
-
-        (success, response) = to.call{value: value}(data);
+        if (operation == Enum.Operation.DelegateCall)
+            (success, ) = to.delegatecall(data);
+        else (success, ) = to.call{value: value}(data);
         require(success, "Safe Tx reverted");
-        return success;
+        if (guard != address(0)) {
+            Guard(guard).checkAfterExecution(bytes32(0), success);
+        }
     }
 
     function execTransactionFromModule(

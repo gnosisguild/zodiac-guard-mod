@@ -6,7 +6,7 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
   const { deployer } = await getNamedAccounts();
   const { deploy } = deployments;
-  const args = [AddressOne, AddressOne, []];
+  const args = [AddressOne, []];
 
   await deploy("ModGuard", {
     from: deployer,

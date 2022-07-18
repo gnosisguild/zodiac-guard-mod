@@ -7,7 +7,7 @@ import { AddressOne } from "@gnosis.pm/safe-contracts";
 const saltNonce = "0xfa";
 
 describe("Module works with factory", () => {
-  const paramsTypes = ["address", "address", "address[]"];
+  const paramsTypes = ["address", "address[]"];
 
   const baseSetup = deployments.createFixture(async () => {
     await deployments.fixture();
@@ -15,18 +15,14 @@ describe("Module works with factory", () => {
     const ModGuard = await hre.ethers.getContractFactory("ModGuard");
     const factory = await Factory.deploy();
 
-    const masterCopy = await ModGuard.deploy(AddressOne, AddressOne, []);
+    const masterCopy = await ModGuard.deploy(AddressOne, []);
 
     return { factory, masterCopy };
   });
 
   it("should throw because master copy is already initialized", async () => {
     const { masterCopy } = await baseSetup();
-    const encodedParams = new AbiCoder().encode(paramsTypes, [
-      AddressOne,
-      AddressOne,
-      [],
-    ]);
+    const encodedParams = new AbiCoder().encode(paramsTypes, [AddressOne, []]);
     await expect(masterCopy.setUp(encodedParams)).to.be.revertedWith(
       "Initializable: contract is already initialized"
     );
@@ -35,7 +31,7 @@ describe("Module works with factory", () => {
   it("should deploy new protect mod guard guard proxy", async () => {
     const { factory, masterCopy } = await baseSetup();
     const [owner] = await ethers.getSigners();
-    const paramsValues = [owner.address, owner.address, []];
+    const paramsValues = [owner.address, []];
     const encodedParams = [new AbiCoder().encode(paramsTypes, paramsValues)];
     const initParams = masterCopy.interface.encodeFunctionData(
       "setUp",

@@ -13,9 +13,7 @@ describe("ModGuard", async () => {
     const avatarFactory = await hre.ethers.getContractFactory("TestAvatar");
     const avatar = await avatarFactory.deploy();
     const factory = await hre.ethers.getContractFactory("ModGuard");
-    const guard = await factory.deploy(user1.address, avatar.address, [
-      AddressOne,
-    ]);
+    const guard = await factory.deploy(user1.address, [AddressOne]);
     await avatar.enableModule(user1.address);
     const setGuard = await avatar.populateTransaction.setGuard(guard.address);
     await expect(
@@ -54,19 +52,19 @@ describe("ModGuard", async () => {
 
     it("throws if owner is zero address", async () => {
       const Guard = await hre.ethers.getContractFactory("ModGuard");
-      await expect(
-        Guard.deploy(AddressZero, AddressZero, [])
-      ).to.be.revertedWith("Ownable: new owner is the zero address");
+      await expect(Guard.deploy(AddressZero, [])).to.be.revertedWith(
+        "Ownable: new owner is the zero address"
+      );
     });
 
     it("should emit event because of successful set up", async () => {
       const Guard = await hre.ethers.getContractFactory("ModGuard");
-      const guard = await Guard.deploy(user1.address, user1.address, []);
+      const guard = await Guard.deploy(user1.address, []);
       await guard.deployed();
 
       await expect(guard.deployTransaction)
         .to.emit(guard, "ModGuardSetup")
-        .withArgs(user1.address, user1.address, user1.address, []);
+        .withArgs(user1.address, user1.address, []);
     });
   });
 
@@ -92,36 +90,71 @@ describe("ModGuard", async () => {
 
   describe("checkAfterExecution()", async () => {
     it("reverts if this guard is disabled", async () => {
-      const { avatar, guard } = await setupTests();
-      const setGuard = await avatar.populateTransaction.setGuard(AddressZero);
-      await expect(
-        avatar.execTransactionFromModule(avatar.address, 0, setGuard.data, 0)
+      const { avatar, guard, tx } = await setupTests();
+      await guard.transferOwnership(avatar.address);
+      const setGuardToZero = await avatar.populateTransaction.setGuard(
+        AddressZero
       );
+
       await expect(
-        guard.checkAfterExecution(
-          "0x0000000000000000000000000000000000000000000000000000000000000000",
-          true
+        avatar.execTransaction(
+          avatar.address,
+          tx.value,
+          setGuardToZero.data,
+          tx.operation,
+          tx.avatarTxGas,
+          tx.baseGas,
+          tx.gasPrice,
+          tx.gasToken,
+          tx.refundReceiver,
+          tx.signatures
         )
       ).to.be.revertedWith("CannotDisableThisGuard");
     });
 
     it("reverts if protected module is disabled", async () => {
-      const { guard } = await setupTests();
+      const { avatar, guard, tx } = await setupTests();
+
+      const disableModule = await avatar.populateTransaction.disableModule(
+        AddressOne,
+        AddressOne
+      );
+
       await expect(
-        guard.checkAfterExecution(
-          "0x0000000000000000000000000000000000000000000000000000000000000000",
-          true
+        avatar.execTransaction(
+          avatar.address,
+          tx.value,
+          disableModule.data,
+          tx.operation,
+          tx.avatarTxGas,
+          tx.baseGas,
+          tx.gasPrice,
+          tx.gasToken,
+          tx.refundReceiver,
+          tx.signatures
         )
       ).to.be.revertedWith("CannotDisableProtecedModules");
     });
 
     it("allows execution if protected module is enabled", async () => {
-      const { avatar, guard } = await setupTests();
+      const { avatar, guard, tx } = await setupTests();
       await avatar.enableModule(AddressOne);
+      const enableModule = await avatar.populateTransaction.enableModule(
+        AddressOne
+      );
+
       await expect(
-        guard.checkAfterExecution(
-          "0x0000000000000000000000000000000000000000000000000000000000000000",
-          true
+        avatar.execTransaction(
+          avatar.address,
+          tx.value,
+          enableModule.data,
+          tx.operation,
+          tx.avatarTxGas,
+          tx.baseGas,
+          tx.gasPrice,
+          tx.gasToken,
+          tx.refundReceiver,
+          tx.signatures
         )
       );
     });
