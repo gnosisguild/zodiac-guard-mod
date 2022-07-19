@@ -20,7 +20,12 @@ contract ModGuard is FactoryFriendly, BaseGuard {
     // Cannot disable protected modules
     error CannotDisableProtecedModules(address module);
 
+    // Cannot change ownership with this account
+    error CannotTransferOwnership();
+
     address[] public protectedModules;
+
+    uint256 guardEntries;
 
     // keccak256("guard_manager.guard.address")
     bytes32 internal constant GUARD_STORAGE_SLOT =
@@ -46,9 +51,37 @@ contract ModGuard is FactoryFriendly, BaseGuard {
         emit ModGuardSetup(msg.sender, _owner, _modules);
     }
 
+    // @dev Sets the modules to be protected.
+    // @param _modules Array of addresses considered protected modules.
+    // @notice This can only be called by the owner.
+    // @notice If an item in this list is not enabled as a module on the attached avatar/mod, all guarded transactiosn will fail.
     function setProtectedModules(address[] memory _modules) public onlyOwner {
         protectedModules = _modules;
         emit ProtectedModulesSet(protectedModules);
+    }
+
+    // @dev Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner.
+    // @notice This can only be called by the owner.
+    // @notice Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.
+    function renounceOwnership() public override onlyOwner {
+        if (guardEntries > 0) {
+            revert CannotTransferOwnership();
+        }
+        _transferOwnership(address(0));
+    }
+
+    // @dev Transfers ownership of the contract to a new account (`newOwner`).
+    // @param newOwner Address to become the new owner of this guard.
+    // @notice This can only be called by the owner.
+    function transferOwnership(address newOwner) public override onlyOwner {
+        if (guardEntries > 0) {
+            revert CannotTransferOwnership();
+        }
+        require(
+            newOwner != address(0),
+            "Ownable: new owner is the zero address"
+        );
+        _transferOwnership(newOwner);
     }
 
     // solhint-disallow-next-line payable-fallback
@@ -70,9 +103,11 @@ contract ModGuard is FactoryFriendly, BaseGuard {
         address payable,
         bytes memory,
         address
-    ) external view override {}
+    ) external override {
+        guardEntries++;
+    }
 
-    function checkAfterExecution(bytes32, bool) external view override {
+    function checkAfterExecution(bytes32, bool) external override {
         if (
             abi.decode(
                 StorageAccessible(msg.sender).getStorageAt(
@@ -89,5 +124,6 @@ contract ModGuard is FactoryFriendly, BaseGuard {
                 revert CannotDisableProtecedModules(protectedModules[i]);
             }
         }
+        guardEntries--;
     }
 }

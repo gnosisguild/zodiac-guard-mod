@@ -158,5 +158,29 @@ describe("ModGuard", async () => {
         )
       );
     });
+
+    it("reverts if multisig tries to change guard owner", async () => {
+      const { avatar, guard, tx } = await setupTests();
+
+      const transferOwnership =
+        await guard.populateTransaction.transferOwnership(user1.address);
+
+      await avatar.enableModule(AddressOne);
+      await guard.transferOwnership(avatar.address);
+      await expect(
+        avatar.execTransaction(
+          guard.address,
+          tx.value,
+          transferOwnership.data,
+          tx.operation,
+          tx.avatarTxGas,
+          tx.baseGas,
+          tx.gasPrice,
+          tx.gasToken,
+          tx.refundReceiver,
+          tx.signatures
+        )
+      ).to.be.reverted;
+    });
   });
 });
