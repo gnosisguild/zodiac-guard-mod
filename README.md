@@ -2,6 +2,7 @@
 
 [![Build Status](https://github.com/gnosis/zodiac-guard-mod/actions/workflows/ci.yml/badge.svg)](https://github.com/gnosis/zodiac-guard-mod/actions/workflows/ci.yml)
 [![Coverage Status](https://coveralls.io/repos/github/gnosis/zodiac-guard-mod/badge.svg?branch=main)](https://coveralls.io/github/gnosis/zodiac-guard-mod)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](https://github.com/gnosis/CODE_OF_CONDUCT)
 
 A transaction guard that allows the owner to guard against transactions that would disable protected mods.
 
