@@ -1,3 +1,6 @@
+# Warning
+**This contract is under development and is unsafe to use in its current form. Check back soon**
+
 # ModGuard
 
 [![Build Status](https://github.com/gnosis/zodiac-guard-mod/actions/workflows/ci.yml/badge.svg)](https://github.com/gnosis/zodiac-guard-mod/actions/workflows/ci.yml)
